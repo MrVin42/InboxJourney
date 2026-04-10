@@ -1,0 +1,25 @@
+{
+  "name": "email-experiment-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Zillow-first platform for signup automation and lifecycle email analysis.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/index.js",
+    "app:open": "powershell.exe -ExecutionPolicy Bypass -File .\\start-app.ps1 -ForceRestart",
+    "app:restart": "powershell.exe -ExecutionPolicy Bypass -File .\\start-app.ps1 -ForceRestart",
+    "app:serve": "node --env-file=.env src/app/server.ts",
+    "gmail:labels": "node --env-file=.env src/cli.ts gmail:labels",
+    "gmail:pull": "node --env-file=.env src/cli.ts gmail:pull",
+    "gmail:analyze": "node --env-file=.env src/cli.ts gmail:analyze",
+    "gmail:report": "node --env-file=.env src/cli.ts gmail:report"
+  },
+  "devDependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
+    "@types/node": "^24.5.2",
+    "googleapis": "^105.0.0",
+    "typescript": "^5.9.0"
+  }
+}

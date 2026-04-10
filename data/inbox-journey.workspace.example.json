@@ -1,0 +1,59 @@
+{
+  "workspaceName": "Inbox Journey Team",
+  "users": [
+    {
+      "id": "alex",
+      "label": "Alex Rivera",
+      "email": "alex@example.com"
+    },
+    {
+      "id": "jamie",
+      "label": "Jamie Chen",
+      "email": "jamie@example.com"
+    }
+  ],
+  "inboxes": [
+    {
+      "id": "alex-gmail",
+      "userId": "alex",
+      "label": "Alex Gmail Forward Inbox",
+      "emailDomain": "InboxJourney.com",
+      "gmailForwardInbox": "alex-inbox@example.com",
+      "gmailCredentialsPath": "../Creds/alex-oauth-client.json",
+      "gmailLookbackDays": 14,
+      "gmailMaxResults": 25,
+      "tests": [
+        {
+          "id": "zillow-new-user",
+          "label": "Zillow New User",
+          "description": "Signup and welcome lifecycle for Zillow.",
+          "aliasPrefixes": ["zillow.new-user."]
+        },
+        {
+          "id": "redfin-new-user",
+          "label": "Redfin New User",
+          "description": "Signup and welcome lifecycle for Redfin.",
+          "aliasPrefixes": ["redfin.new-user."]
+        }
+      ]
+    },
+    {
+      "id": "jamie-gmail",
+      "userId": "jamie",
+      "label": "Jamie Gmail Forward Inbox",
+      "emailDomain": "InboxJourney.com",
+      "gmailForwardInbox": "jamie-inbox@example.com",
+      "gmailCredentialsPath": "../Creds/jamie-oauth-client.json",
+      "gmailLookbackDays": 7,
+      "gmailMaxResults": 15,
+      "tests": [
+        {
+          "id": "opendoor-reengagement",
+          "label": "Opendoor Re-engagement",
+          "description": "Dormant user re-engagement stream.",
+          "aliasIncludes": ["opendoor", "return-visit"]
+        }
+      ]
+    }
+  ]
+}
