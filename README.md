@@ -1,123 +1,64 @@
-# Email Experiment Platform
+# Inbox Journey
 
-This repo is a Zillow-first MVP for a system that:
+Inbox Journey is a lifecycle email analysis tool for teams that want to understand what happens after a user signs up for a product.
 
-- creates or manages experiment identities
-- supports multiple users and multiple configured inboxes per workspace
-- signs up for a site and performs scripted activity
-- ingests the follow-up emails
-- analyzes quality, relevance, cadence, and issues
-- produces metrics and improvement suggestions
+It helps you:
 
-## Recommended Identity Strategy
+- connect one or more inboxes to a workspace
+- monitor onboarding and follow-up emails from brands like Zillow and Redfin
+- analyze timing, quality, personalization, Gmail tab placement, and click-through opportunities
+- review emails in a visual timeline with previews and screenshots
+- compare brands, inboxes, and tests from an admin view
 
-The most durable approach is a custom domain with catch-all routing. That lets us generate a unique address per site, scenario, and run, for example:
+## Current Status
 
-`zillow.saved-search.r001@signals.example.com`
+This repo is a working local MVP with:
 
-Why this is the best long-term option:
+- Gmail-powered inbox syncing
+- workspace and inbox configuration
+- a hosted-style marketing homepage and authenticated app shell
+- timeline reporting with screenshots and analysis
+- docs for the future hosted multi-tenant version
 
-- each scenario gets an isolated inbox identity
-- signup verification emails can be correlated to a specific run
-- raw MIME, links, and headers can be stored without mixing with personal mail
-- a copy can still be forwarded to Gmail for manual review
+The current app is best thought of as a strong prototype and internal tool, not a finished hosted SaaS yet.
 
-Fallback options:
+## What The App Does
 
-- Gmail plus addressing for quick prototyping
-- a dedicated Gmail mailbox for early manual testing
+Inbox Journey combines four core jobs:
 
-## Zillow MVP Scope
+1. identity management for experiment email addresses
+2. inbox syncing and parsing
+3. scoring and recommendations for each email
+4. a visual workspace timeline for review
 
-The first scenario pack is intentionally narrow and reproducible:
+The first scenario pack is focused on real estate lifecycle emails, with Zillow as the original use case and Redfin now included in live analysis flows.
 
-1. create an account
-2. search a metro area with explicit filters
-3. view a handful of listings
-4. save some homes
-5. save a search
-6. wait for resulting emails and analyze them
+## Quick Start
 
-We should avoid flows that contact real agents or create noisy marketplace behavior unless we have an explicit testing policy for that.
-
-## Project Layout
-
-- `docs/` architecture and MVP notes
-- `docs/web-hosted-architecture.md` hosted multi-tenant product plan
-- `docs/auth-integration-plan.md` auth and account model plan
-- `docs/hosted-api-shape.md` hosted admin and workspace API contract
-- `docs/hosted-schema.sql` first-pass hosted Postgres schema
-- `data/inbox-journey.workspace.example.json` example multi-user workspace config
-- `data/inbox-journey.workspace.json` real local admin workspace config
-- `src/identity/` address generation and identity policy
-- `src/domain/` shared entities and metrics
-- `src/scenarios/` website-specific scenario packs
-- `src/analyzers/` heuristic analysis and suggestions
-- `src/index.ts` sample assembly entrypoint
-
-## Multi-User Inbox Setup
-
-Inbox Journey can now run in two modes:
-
-- environment fallback mode:
-  - uses the existing `.env` values for one default inbox
-- workspace config mode:
-  - uses a JSON file that defines users, inboxes, and inbox-scoped tests
-
-To enable workspace config mode:
-
-1. copy `data/inbox-journey.workspace.example.json` to `data/inbox-journey.workspace.json`
-2. update each user entry
-3. update each inbox entry with:
-   - the owner `userId`
-   - the forwarded Gmail inbox
-   - the Gmail OAuth client JSON path for that inbox
-   - the email domain used for alias correlation
-4. optionally define tests using:
-   - `aliasPrefixes`
-   - `aliasIncludes`
-5. run commands as usual, or target a specific inbox:
+### 1. Install dependencies
 
 ```powershell
-npm.cmd run gmail:report -- --user alex --inbox alex-gmail
-npm.cmd run gmail:analyze -- --test zillow-new-user
+npm.cmd install
 ```
 
-Notes:
+### 2. Create local config
 
-- each configured inbox uses its own persisted Gmail OAuth token
-- users provide and own their own inbox connection
-- tests are attached to inboxes so separate users can run different experiment sets
+Use the provided examples as the starting point:
 
-## Hosted Direction
+- `.env.example`
+- `data/inbox-journey.workspace.example.json`
 
-The repo now also includes a hosted-product architecture plan in:
+Your real local inbox config is intentionally ignored by git.
 
-- `docs/web-hosted-architecture.md`
+### 3. Authenticate Gmail
 
-Recommended first hosted version:
+```powershell
+npm.cmd run gmail:labels
+```
 
-- users sign into a web app
-- each account can create multiple workspaces
-- each workspace can connect one or more user-owned inboxes
-- Gmail is the first inbox provider
-- Inbox Journey stores syncs, analyses, screenshots, and metrics centrally
-- the admin view can switch between workspace and inbox context
+That will walk through the Gmail OAuth flow for the configured inbox.
 
-Current local hosted-style routes:
-
-- `/` marketing homepage with signup CTA
-- `/login` auth entrypoint for the protected app shell
-- `/app` analysis dashboard
-- `/app/report` raw report route used by the authenticated shell
-- `/api/auth/demo-signin` local auth session creation
-- `/api/auth/session` current local session
-- `/api/signup` local signup capture
-- `/api/hosted/admin/overview` hosted admin summary
-
-## Local App Startup
-
-The easiest way to open the app locally is:
+### 4. Start the app
 
 ```powershell
 npm.cmd run app:open
@@ -125,25 +66,84 @@ npm.cmd run app:open
 
 That launcher will:
 
-- start the local server in a dedicated PowerShell window if it is not already running
-- wait for the app to respond
-- open the browser to `/login`
+- restart the local server
+- wait until the app responds
+- open the browser to the sign-in page
 
-If you want the old manual flow, this still works:
+You can also run the server manually:
 
 ```powershell
 npm.cmd run app:serve
 ```
 
-Recommended later version:
+## Core Commands
 
-- Inbox Journey provisions managed custom inboxes per workspace or test
+```powershell
+npm.cmd run app:open
+npm.cmd run app:serve
+npm.cmd run gmail:labels
+npm.cmd run gmail:pull
+npm.cmd run gmail:analyze
+npm.cmd run gmail:report
+npm.cmd run check
+```
 
-## Next Build Steps
+## Workspace Model
 
-1. wire a real mail source:
-   - inbound provider webhook, or
-   - Gmail API polling for a dedicated mailbox
-2. add Playwright automation for Zillow account creation and browsing
-3. persist runs, actions, emails, and analysis in Postgres
-4. add HTML snapshotting and CTA validation
+Inbox Journey currently supports:
+
+- multiple users per workspace
+- multiple inboxes per workspace
+- inbox-scoped tests
+- brand comparison across a shared timeline
+
+The local JSON workspace config lets each user bring their own inbox while keeping tests and analysis grouped under one workspace.
+
+## Project Layout
+
+- `src/app/` local web app, auth shell, homepage, and sync server
+- `src/mail/` Gmail auth and inbox ingestion
+- `src/analyzers/` email scoring and recommendation logic
+- `src/report/` timeline report generation and screenshot handling
+- `src/hosted/` hosted multi-tenant domain models and local auth scaffolding
+- `src/scenarios/` site-specific scenario packs
+- `docs/` architecture, auth, schema, and hosted roadmap notes
+- `data/` example workspace config and local runtime JSON data
+
+## Hosted Direction
+
+The intended hosted version of Inbox Journey looks like this:
+
+- users sign into a web app
+- each account can own multiple workspaces
+- each workspace can connect one or more inboxes
+- inbox connections remain separate from product auth
+- analyses, screenshots, and metrics are stored centrally
+
+Recommended docs for that next phase:
+
+- [web-hosted-architecture](docs/web-hosted-architecture.md)
+- [auth-integration-plan](docs/auth-integration-plan.md)
+- [hosted-schema](docs/hosted-schema.sql)
+- [hosted-api-shape](docs/hosted-api-shape.md)
+
+## Notes About Git
+
+This repo ignores:
+
+- live credentials
+- local Gmail auth tokens
+- generated reports and screenshots
+- local workspace config
+- local signup and session data
+
+That keeps the public repo safe while still letting the app run locally with private configuration.
+
+## Next Steps
+
+Natural next improvements are:
+
+1. move workspace and auth data into Postgres
+2. replace local auth with Clerk-backed auth
+3. add hosted deployment for the app shell and marketing site
+4. add Playwright-based site automation for scenario generation
